@@ -12,7 +12,7 @@
     "@ai-sdk/openai": "2.0.16",
     "@ai-sdk/react": "2.0.16",
     "ai": "5.0.16",
-    "next": "15.4.7",
+    "next": "15.5.25",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "zod": "4.0.17"
@@ -24,7 +24,7 @@
     "@types/react": "19.1.10",
     "@types/react-dom": "19.1.7",
     "eslint": "9.33.0",
-    "eslint-config-next": "15.4.7",
+    "eslint-config-next": "15.5.25",
     "tailwindcss": "4.1.12",
     "typescript": "5.9.2"
   }
