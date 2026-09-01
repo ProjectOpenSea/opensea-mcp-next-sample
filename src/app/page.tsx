@@ -4,6 +4,22 @@ import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls } from 'ai';
 import { useMemo, useState } from 'react';
 
+/**
+ * The subset of a tool-invocation message part that the inspector below
+ * renders. Every field is optional because the AI SDK emits several part
+ * shapes (`dynamic-tool`, `tool-<name>`) and adds fields between versions;
+ * treating them as optional is what makes narrowing to this type sound.
+ */
+type ToolLikePart = {
+  type?: string;
+  toolCallId?: string;
+  toolName?: string;
+  state?: string;
+  input?: unknown;
+  output?: unknown;
+  errorText?: string;
+};
+
 export default function Chat() {
   const [input, setInput] = useState('');
   const [expandedToolCalls, setExpandedToolCalls] = useState<Record<string, boolean>>({});
@@ -122,13 +138,17 @@ export default function Chat() {
                 // Do not show raw reasoning content; just an indicator elsewhere
                 return <div key={key} />;
               default: {
-                // Handle tool parts generically (covers both dynamic-tool and tool-<name>)
-                const p: any = part as any;
+                // Tool parts arrive under two shapes: `dynamic-tool` and
+                // `tool-<name>`. Rather than widening to `any`, describe the
+                // few fields this inspector reads and narrow into it. The cast
+                // stays honest because every field is optional: nothing here
+                // assumes a property the SDK might not send.
+                const p = part as ToolLikePart;
                 if (p && (p.toolCallId != null || String(p.type || '').startsWith('tool-') || p.type === 'dynamic-tool')) {
                   const callId: string = p.toolCallId ?? `${message.id}-${i}`;
                   const expanded = expandedToolCalls[callId] ?? false;
                   const toolName: string = p.toolName ?? String(p.type || '').replace(/^tool-/, '') ?? 'tool';
-                  const state = p.state as string | undefined;
+                  const state = p.state;
                   const stateLabel = state === 'input-streaming'
                     ? 'Running'
                     : state === 'input-available'
